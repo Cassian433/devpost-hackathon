@@ -4,6 +4,7 @@ import { Suspense, useEffect, useRef } from "react";
 import type * as THREE from "three";
 
 import { CathedralModel } from "./CathedralModel";
+import { BinaryTreeModel, DnaModel, LatticeModel, WaveModel } from "./ConceptModels";
 import { HeartModel } from "./HeartModel";
 import { Hotspot3D } from "./Hotspot3D";
 import { MoleculeModel } from "./MoleculeModel";
@@ -49,6 +50,10 @@ function SceneBody({ scene, options }: { scene: SceneModule; options: Record<str
   if (scene.id === "cathedral") return <CathedralModel showVault={options["vault"] ?? true} />;
   if (scene.id === "solar-system") return <SolarSystemModel />;
   if (scene.id === "tectonics") return <TectonicModel />;
+  if (scene.id === "binary-tree") return <BinaryTreeModel />;
+  if (scene.id === "dna") return <DnaModel unwind={options["unwind"] ?? false} />;
+  if (scene.id === "wave-interference") return <WaveModel twoSources={options["twoSources"] ?? true} />;
+  if (scene.id === "lattice") return <LatticeModel showBonds={options["bonds"] ?? true} />;
   return <GearboxModel />;
 }
 
