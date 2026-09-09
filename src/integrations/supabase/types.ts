@@ -14,7 +14,126 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      flashcards: {
+        Row: {
+          answer: string
+          box: number
+          correct: number
+          created_at: string
+          id: string
+          next_review: string
+          question: string
+          reviews: number
+          scene_id: string
+          user_id: string
+        }
+        Insert: {
+          answer: string
+          box?: number
+          correct?: number
+          created_at?: string
+          id?: string
+          next_review?: string
+          question: string
+          reviews?: number
+          scene_id?: string
+          user_id: string
+        }
+        Update: {
+          answer?: string
+          box?: number
+          correct?: number
+          created_at?: string
+          id?: string
+          next_review?: string
+          question?: string
+          reviews?: number
+          scene_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      focus_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          minutes: number
+          preset: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          minutes?: number
+          preset: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          minutes?: number
+          preset?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      module_progress: {
+        Row: {
+          created_at: string
+          id: string
+          last_seen: string
+          mastery: number
+          scene_id: string
+          seconds: number
+          user_id: string
+          visits: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_seen?: string
+          mastery?: number
+          scene_id: string
+          seconds?: number
+          user_id: string
+          visits?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_seen?: string
+          mastery?: number
+          scene_id?: string
+          seconds?: number
+          user_id?: string
+          visits?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          daily_goal_minutes: number
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_goal_minutes?: number
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_goal_minutes?: number
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
