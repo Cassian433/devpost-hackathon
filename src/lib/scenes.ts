@@ -308,6 +308,90 @@ export const scenes: SceneModule[] = [
       { id: "gear-mesh", name: "Meshing Teeth", position: [0.15, 0.4, 0.45], category: "Contact", summary: "Involute tooth profiles maintain a nearly constant velocity ratio as contact travels across each pair of teeth.", facts: ["Involute profile", "Requires backlash", "Lubrication limits wear"] },
     ],
   },
+  {
+    id: "binary-tree",
+    title: "Binary Search Tree",
+    subject: "Computer Science",
+    tagline: "Data structures you can walk around",
+    description:
+      "Fly through a live binary search tree. See why height — not node count — sets lookup cost, and how an unbalanced insert order degrades the structure toward a linked list.",
+    level: "Foundation",
+    duration: "10 min guided",
+    accentLabel: "Computer Science",
+    tutorContext:
+      "You are teaching data structures and algorithms to a first-year computer science student. Explain binary search trees, tree height, traversal orders, big-O complexity and balancing, referring to the visible node layout.",
+    camera: { position: [0, 2.2, 11], target: [0, 0.6, 0] },
+    hotspots: [
+      { id: "root", name: "Root Node", position: [0, 2.2, 0], category: "Node", summary: "The entry point of every search. Each comparison at the root discards roughly half the remaining keys when the tree is balanced.", facts: ["Holds key 50 here", "Every search starts here", "No parent pointer"] },
+      { id: "left-subtree", name: "Left Subtree", position: [-2.4, 0.5, 0], category: "Invariant", summary: "Every key in this subtree is smaller than its parent — the ordering invariant that makes search logarithmic instead of linear.", facts: ["All keys < parent", "Checked on every insert", "In-order walk yields sorted keys"] },
+      { id: "leaf", name: "Leaf Node", position: [-3.6, -1.2, 0], category: "Node", summary: "A node with no children. Searches that reach a leaf without a match have failed, costing one comparison per level travelled.", facts: ["Zero children", "Where inserts attach", "Deepest comparison point"] },
+      { id: "height", name: "Tree Height", position: [4.6, -2.8, 0], category: "Complexity", summary: "The longest root-to-leaf path. Balanced trees keep it near log₂(n), giving O(log n) search; sorted inserts push it to n and O(n).", facts: ["Balanced: O(log n)", "Degenerate: O(n)", "AVL and red-black trees rebalance"] },
+      { id: "traversal", name: "Traversal Order", position: [2.4, 0.5, 0], category: "Algorithm", summary: "In-order, pre-order and post-order visits differ only in when the node is read relative to its children — same walk, different output.", facts: ["In-order returns sorted data", "Pre-order copies structure", "Post-order frees safely"] },
+    ],
+  },
+  {
+    id: "dna",
+    title: "DNA Double Helix",
+    subject: "Molecular Biology",
+    tagline: "The molecule that stores you",
+    description:
+      "Orbit a right-handed B-form double helix. Examine the sugar-phosphate backbone, complementary base pairing and the grooves that proteins read information through.",
+    level: "Intermediate",
+    duration: "11 min guided",
+    accentLabel: "Biology",
+    tutorContext:
+      "You are teaching molecular biology. Explain nucleotide structure, complementary base pairing, antiparallel strands, helix geometry, grooves, replication and transcription, referring to the visible helix.",
+    camera: { position: [0, 1.2, 9.5], target: [0, 0, 0] },
+    hotspots: [
+      { id: "backbone", name: "Sugar-Phosphate Backbone", position: [1.5, 3.2, 0], category: "Structure", summary: "Alternating deoxyribose and phosphate groups form a covalent, negatively charged rail that gives the molecule its directionality.", facts: ["Linked by phosphodiester bonds", "Runs 5′ → 3′", "Negative charge aids protein binding"] },
+      { id: "base-pair", name: "Complementary Base Pair", position: [0, 0.4, 0], category: "Chemistry", summary: "Adenine pairs with thymine via two hydrogen bonds; guanine pairs with cytosine via three — which is why GC-rich DNA melts at a higher temperature.", facts: ["A–T: 2 hydrogen bonds", "G–C: 3 hydrogen bonds", "Pairing enables faithful copying"] },
+      { id: "antiparallel", name: "Antiparallel Strands", position: [-1.5, -2.4, 0], category: "Geometry", summary: "The two strands run in opposite chemical directions, which forces replication to be continuous on one strand and fragmented on the other.", facts: ["One 5′→3′, one 3′→5′", "Leading vs lagging strand", "Okazaki fragments on the lagging strand"] },
+      { id: "grooves", name: "Major and Minor Grooves", position: [1.6, -4.4, 0], category: "Recognition", summary: "Unequal backbone spacing creates a wide and a narrow groove; transcription factors read base identity mostly through the major groove.", facts: ["Major groove ≈ 2.2 nm wide", "Protein recognition site", "Minor groove binds small drugs"] },
+      { id: "pitch", name: "Helical Pitch", position: [0, 5.4, 0], category: "Geometry", summary: "One full turn spans about 10.5 base pairs and 3.4 nm, so each base pair sits 0.34 nm above and roughly 34° around from the last.", facts: ["Right-handed B-form", "3.4 nm per turn", "0.34 nm base-pair rise"] },
+    ],
+  },
+  {
+    id: "wave-interference",
+    title: "Wave Interference",
+    subject: "Physics",
+    tagline: "Superposition made visible",
+    description:
+      "Watch two coherent sources radiate across a live surface. Trace the nodal lines where crests cancel troughs and see why path difference — not distance — decides intensity.",
+    level: "Intermediate",
+    duration: "9 min guided",
+    accentLabel: "Physics",
+    tutorContext:
+      "You are teaching wave physics and optics. Explain superposition, coherence, path difference, constructive and destructive interference, wavelength and the double-slit result using the animated surface.",
+    camera: { position: [0, 7.5, 10.5], target: [0, -0.5, 0] },
+    hotspots: [
+      { id: "source-a", name: "Coherent Source A", position: [-2.4, 0.6, 2.2], category: "Source", summary: "A point source radiating circular wavefronts at a fixed frequency and phase — coherence is what makes a stable pattern possible.", facts: ["Fixed frequency", "Constant phase relationship", "Amplitude falls with distance"] },
+      { id: "source-b", name: "Coherent Source B", position: [2.4, 0.6, 2.2], category: "Source", summary: "A second identical source. Its separation from source A sets the angular spacing of the resulting fringes.", facts: ["Same wavelength as A", "Separation sets fringe spacing", "Analogous to a double slit"] },
+      { id: "constructive", name: "Constructive Ridge", position: [0, 1.6, 0], category: "Superposition", summary: "Along the perpendicular bisector both waves arrive in phase, so displacements add and amplitude doubles.", facts: ["Path difference = nλ", "Amplitude adds", "Intensity ∝ amplitude²"] },
+      { id: "destructive", name: "Nodal Line", position: [2.9, 0, -1.8], category: "Superposition", summary: "Where the path difference is an odd number of half wavelengths, one crest meets a trough and the surface stays flat.", facts: ["Path difference = (n+½)λ", "Total cancellation", "Energy is redistributed, not lost"] },
+      { id: "wavelength", name: "Wavelength", position: [-3.4, 0.4, -2.2], category: "Quantity", summary: "The crest-to-crest spacing. Shorter wavelengths pack fringes closer together for the same source separation.", facts: ["λ = v / f", "Sets fringe spacing", "Same maths for light, sound and water"] },
+    ],
+  },
+  {
+    id: "lattice",
+    title: "Ionic Crystal Lattice",
+    subject: "Chemistry",
+    tagline: "Why salt is hard and brittle",
+    description:
+      "Inspect a face-centred cubic sodium chloride lattice. Compare ionic radii, count coordination numbers and connect lattice energy to melting point and cleavage.",
+    level: "Foundation",
+    duration: "8 min guided",
+    accentLabel: "Chemistry",
+    tutorContext:
+      "You are teaching inorganic and physical chemistry. Explain ionic bonding, coordination number, ionic radii, lattice energy, cleavage planes and physical properties using the visible NaCl lattice.",
+    camera: { position: [7.5, 5.5, 8.5], target: [0, 0, 0] },
+    hotspots: [
+      { id: "cation", name: "Sodium Cation", position: [-1.5, 1.5, 1.5], category: "Ion", summary: "Losing one electron shrinks sodium dramatically, so the cation slots into the gaps between much larger chloride ions.", facts: ["Ionic radius ≈ 102 pm", "Charge +1", "Six chloride neighbours"] },
+      { id: "anion", name: "Chloride Anion", position: [0, 1.5, 1.5], category: "Ion", summary: "Gaining an electron expands the ion; chloride dominates the lattice volume and defines the packing arrangement.", facts: ["Ionic radius ≈ 181 pm", "Charge −1", "Six sodium neighbours"] },
+      { id: "coordination", name: "Coordination Number", position: [1.5, 0, 0], category: "Geometry", summary: "Each ion is octahedrally surrounded by six of the opposite charge — the 6:6 arrangement typical of the rock-salt structure.", facts: ["6:6 coordination", "Octahedral geometry", "Set by the radius ratio"] },
+      { id: "lattice-energy", name: "Lattice Energy", position: [0, -2.4, 0], category: "Energetics", summary: "The energy released as gaseous ions assemble into the lattice; its size explains the 801 °C melting point and low solubility of harder salts.", facts: ["≈ −787 kJ/mol for NaCl", "Rises with charge, falls with radius", "Drives high melting points"] },
+      { id: "cleavage", name: "Cleavage Plane", position: [2.4, 2.4, -2.4], category: "Property", summary: "Sliding one layer by a single ion aligns like charges, so the crystal shatters along flat planes instead of deforming.", facts: ["Brittle failure", "Cleaves at 90° angles", "No delocalised electrons to flow"] },
+    ],
+  },
 ];
 
 export function getScene(id: string): SceneModule | undefined {
