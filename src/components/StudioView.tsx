@@ -10,6 +10,9 @@ const SCENE_TOGGLES: Record<string, { key: string; label: string }[]> = {
   cardiac: [{ key: "pulse", label: "Cardiac cycle animation" }],
   caffeine: [{ key: "hydrogens", label: "Show hydrogen atoms" }],
   cathedral: [{ key: "vault", label: "Show rib vault" }],
+  dna: [{ key: "unwind", label: "Tighten the helix" }],
+  "wave-interference": [{ key: "twoSources", label: "Second wave source" }],
+  lattice: [{ key: "bonds", label: "Show ionic bonds" }],
 };
 
 export function StudioView({ scene }: { scene: SceneModule }) {
