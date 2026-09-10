@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Layers, Orbit, RotateCcw, Sliders } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { SceneCanvas, type Viewpoint } from "./scene/SceneCanvas";
 import { TutorPanel } from "./TutorPanel";
@@ -24,9 +24,29 @@ export function StudioView({ scene }: { scene: SceneModule }) {
   );
   const [key, setKey] = useState(0);
 
-  const hotspot = useMemo(() => scene.hotspots.find((h) => h.id === activeId) ?? null, [scene, activeId]);
+  const hotspot = useMemo(
+    () => scene.hotspots.find((h) => h.id === activeId) ?? null,
+    [scene, activeId],
+  );
   const onViewpoint = useCallback((v: Viewpoint) => setViewpoint(v), []);
   const onSelect = useCallback((id: string) => setActiveId(id === "" ? null : id), []);
+
+  // Keyboard: 1–9 jump to a structure, Esc clears. Ignored while typing in the tutor box.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA")) return;
+      if (e.key === "Escape") {
+        setActiveId(null);
+        return;
+      }
+      const n = Number(e.key);
+      const target = n >= 1 && n <= 9 ? scene.hotspots[n - 1] : undefined;
+      if (target) setActiveId(target.id);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [scene]);
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
@@ -41,7 +61,9 @@ export function StudioView({ scene }: { scene: SceneModule }) {
           </Link>
           <div className="h-6 w-px bg-border" />
           <div className="min-w-0">
-            <h1 className="truncate font-display text-base font-semibold md:text-lg">{scene.title}</h1>
+            <h1 className="truncate font-display text-base font-semibold md:text-lg">
+              {scene.title}
+            </h1>
             <p className="label-mono truncate">
               {scene.subject} · {scene.level}
             </p>
@@ -51,7 +73,9 @@ export function StudioView({ scene }: { scene: SceneModule }) {
           <button
             onClick={() => setAutoRotate((v) => !v)}
             className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs transition-colors ${
-              autoRotate ? "border-primary/70 bg-primary/15 text-primary" : "border-border text-muted-foreground hover:text-foreground"
+              autoRotate
+                ? "border-primary/70 bg-primary/15 text-primary"
+                : "border-border text-muted-foreground hover:text-foreground"
             }`}
           >
             <Orbit className="h-3.5 w-3.5" /> Orbit
@@ -81,14 +105,20 @@ export function StudioView({ scene }: { scene: SceneModule }) {
                 key={h.id}
                 onClick={() => setActiveId(h.id)}
                 className={`mb-1 w-full rounded-lg px-3 py-2.5 text-left transition-colors ${
-                  activeId === h.id ? "bg-primary/15 ring-1 ring-primary/40" : "hover:bg-secondary/60"
+                  activeId === h.id
+                    ? "bg-primary/15 ring-1 ring-primary/40"
+                    : "hover:bg-secondary/60"
                 }`}
               >
                 <div className="flex items-baseline gap-2">
-                  <span className="font-mono text-[10px] text-muted-foreground">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="font-mono text-[10px] text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
                   <span className="text-sm font-medium">{h.name}</span>
                 </div>
-                <span className="mt-0.5 block pl-6 text-[11px] text-muted-foreground">{h.category}</span>
+                <span className="mt-0.5 block pl-6 text-[11px] text-muted-foreground">
+                  {h.category}
+                </span>
               </button>
             ))}
           </div>
@@ -99,7 +129,10 @@ export function StudioView({ scene }: { scene: SceneModule }) {
                 <span className="label-mono">Render options</span>
               </div>
               {(SCENE_TOGGLES[scene.id] ?? []).map((t) => (
-                <label key={t.key} className="mb-1.5 flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+                <label
+                  key={t.key}
+                  className="mb-1.5 flex cursor-pointer items-center gap-2 text-xs text-muted-foreground"
+                >
                   <input
                     type="checkbox"
                     checked={options[t.key] ?? false}
@@ -132,10 +165,15 @@ export function StudioView({ scene }: { scene: SceneModule }) {
             <div className="pointer-events-none absolute bottom-4 left-4 right-4 rounded-xl border border-accent/40 bg-background/80 p-3 backdrop-blur-md md:max-w-md">
               <p className="label-mono text-accent">{hotspot.category}</p>
               <p className="mt-1 font-display text-sm font-semibold">{hotspot.name}</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{hotspot.summary}</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                {hotspot.summary}
+              </p>
               <ul className="mt-2 flex flex-wrap gap-1.5">
                 {hotspot.facts.map((f) => (
-                  <li key={f} className="rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-muted-foreground">
+                  <li
+                    key={f}
+                    className="rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-muted-foreground"
+                  >
                     {f}
                   </li>
                 ))}
@@ -143,7 +181,8 @@ export function StudioView({ scene }: { scene: SceneModule }) {
             </div>
           ) : (
             <p className="pointer-events-none absolute bottom-4 left-4 text-xs text-muted-foreground">
-              Drag to orbit · scroll to zoom · click a marker to ask the tutor
+              Drag to orbit · scroll to zoom · click a marker or press 1–
+              {Math.min(9, scene.hotspots.length)} · Esc clears
             </p>
           )}
         </section>

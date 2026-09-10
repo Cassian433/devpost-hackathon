@@ -1,7 +1,7 @@
 import { Environment, Lightformer, OrbitControls } from "@react-three/drei";
-import { Canvas, useThree } from "@react-three/fiber";
-import { Suspense, useEffect, useRef } from "react";
-import type * as THREE from "three";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Suspense, useEffect, useRef, type RefObject } from "react";
+import * as THREE from "three";
 
 import { CathedralModel } from "./CathedralModel";
 import { BinaryTreeModel, DnaModel, LatticeModel, WaveModel } from "./ConceptModels";
@@ -17,6 +17,8 @@ export type Viewpoint = {
   azimuth: number;
   polar: number;
 };
+
+type Controls = React.ComponentRef<typeof OrbitControls>;
 
 function ViewpointTracker({ onChange }: { onChange: (v: Viewpoint) => void }) {
   const camera = useThree((s) => s.camera);
@@ -44,15 +46,89 @@ function ViewpointTracker({ onChange }: { onChange: (v: Viewpoint) => void }) {
   return null;
 }
 
+type Flight = {
+  t: number;
+  fromPos: THREE.Vector3;
+  toPos: THREE.Vector3;
+  fromTarget: THREE.Vector3;
+  toTarget: THREE.Vector3;
+};
+
+const FLIGHT_SECONDS = 0.9;
+
+/**
+ * Smoothly re-frames the camera on the selected hotspot. Keeps the student's current
+ * viewing direction so the move reads as "lean in", not "teleport". Any drag or scroll
+ * cancels the flight immediately so the user is always in control.
+ */
+function CameraRig({
+  controls,
+  focus,
+  sceneScale,
+}: {
+  controls: RefObject<Controls | null>;
+  focus: [number, number, number] | null;
+  sceneScale: number;
+}) {
+  const camera = useThree((s) => s.camera);
+  const flight = useRef<Flight | null>(null);
+
+  useEffect(() => {
+    const c = controls.current;
+    if (!c) return;
+    const cancel = () => {
+      flight.current = null;
+    };
+    c.addEventListener("start", cancel);
+    return () => c.removeEventListener("start", cancel);
+  }, [controls]);
+
+  const focusKey = focus ? focus.join(",") : null;
+  useEffect(() => {
+    const c = controls.current;
+    if (!focus || !c) return;
+    const toTarget = new THREE.Vector3(...focus);
+    const dir = camera.position.clone().sub(c.target);
+    if (dir.lengthSq() < 1e-6) dir.set(0.4, 0.35, 1);
+    dir.normalize();
+    // Frame the neighbourhood, not the surface: far enough out that adjacent structures stay in view.
+    const distance = Math.max(4, sceneScale * 0.7);
+    flight.current = {
+      t: 0,
+      fromPos: camera.position.clone(),
+      toPos: toTarget.clone().add(dir.multiplyScalar(distance)),
+      fromTarget: c.target.clone(),
+      toTarget,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusKey]);
+
+  useFrame((_, dt) => {
+    const f = flight.current;
+    const c = controls.current;
+    if (!f || !c) return;
+    f.t = Math.min(1, f.t + dt / FLIGHT_SECONDS);
+    const k = 1 - Math.pow(1 - f.t, 3);
+    camera.position.lerpVectors(f.fromPos, f.toPos, k);
+    c.target.lerpVectors(f.fromTarget, f.toTarget, k);
+    c.update();
+    if (f.t >= 1) flight.current = null;
+  });
+
+  return null;
+}
+
 function SceneBody({ scene, options }: { scene: SceneModule; options: Record<string, boolean> }) {
   if (scene.id === "cardiac") return <HeartModel pulse={options["pulse"] ?? true} />;
-  if (scene.id === "caffeine") return <MoleculeModel showHydrogens={options["hydrogens"] ?? true} />;
+  if (scene.id === "caffeine")
+    return <MoleculeModel showHydrogens={options["hydrogens"] ?? true} />;
   if (scene.id === "cathedral") return <CathedralModel showVault={options["vault"] ?? true} />;
   if (scene.id === "solar-system") return <SolarSystemModel />;
   if (scene.id === "tectonics") return <TectonicModel />;
   if (scene.id === "binary-tree") return <BinaryTreeModel />;
   if (scene.id === "dna") return <DnaModel unwind={options["unwind"] ?? false} />;
-  if (scene.id === "wave-interference") return <WaveModel twoSources={options["twoSources"] ?? true} />;
+  if (scene.id === "wave-interference")
+    return <WaveModel twoSources={options["twoSources"] ?? true} />;
   if (scene.id === "lattice") return <LatticeModel showBonds={options["bonds"] ?? true} />;
   return <GearboxModel />;
 }
@@ -66,8 +142,19 @@ type Props = {
   autoRotate: boolean;
 };
 
-export function SceneCanvas({ scene, activeHotspot, onSelectHotspot, onViewpoint, options, autoRotate }: Props) {
-  const controls = useRef<React.ComponentRef<typeof OrbitControls>>(null);
+export function SceneCanvas({
+  scene,
+  activeHotspot,
+  onSelectHotspot,
+  onViewpoint,
+  options,
+  autoRotate,
+}: Props) {
+  const controls = useRef<Controls>(null);
+  const active = scene.hotspots.find((h) => h.id === activeHotspot) ?? null;
+  const sceneScale = new THREE.Vector3(...scene.camera.position).distanceTo(
+    new THREE.Vector3(...scene.camera.target),
+  );
 
   return (
     <Canvas
@@ -95,8 +182,20 @@ export function SceneCanvas({ scene, activeHotspot, onSelectHotspot, onViewpoint
       <Suspense fallback={null}>
         <Environment resolution={128}>
           <Lightformer intensity={2.4} position={[0, 6, 0]} scale={[12, 12, 1]} />
-          <Lightformer intensity={1.1} color="#8fc4ff" position={[-6, 2, -2]} rotation-y={Math.PI / 2} scale={[20, 2, 1]} />
-          <Lightformer intensity={0.9} color="#ffc07a" position={[6, 1, 2]} rotation-y={-Math.PI / 2} scale={[20, 2, 1]} />
+          <Lightformer
+            intensity={1.1}
+            color="#8fc4ff"
+            position={[-6, 2, -2]}
+            rotation-y={Math.PI / 2}
+            scale={[20, 2, 1]}
+          />
+          <Lightformer
+            intensity={0.9}
+            color="#ffc07a"
+            position={[6, 1, 2]}
+            rotation-y={-Math.PI / 2}
+            scale={[20, 2, 1]}
+          />
         </Environment>
 
         <SceneBody scene={scene} options={options} />
@@ -107,6 +206,7 @@ export function SceneCanvas({ scene, activeHotspot, onSelectHotspot, onViewpoint
             hotspot={h}
             index={i}
             active={activeHotspot === h.id}
+            dimmed={activeHotspot !== null && activeHotspot !== h.id}
             onSelect={onSelectHotspot}
           />
         ))}
@@ -124,6 +224,7 @@ export function SceneCanvas({ scene, activeHotspot, onSelectHotspot, onViewpoint
         autoRotate={autoRotate}
         autoRotateSpeed={0.55}
       />
+      <CameraRig controls={controls} focus={active?.position ?? null} sceneScale={sceneScale} />
       <ViewpointTracker onChange={onViewpoint} />
     </Canvas>
   );

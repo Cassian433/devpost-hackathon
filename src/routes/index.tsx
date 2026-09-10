@@ -1,5 +1,14 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { Boxes, Brain, Compass, Cpu, Gauge, MousePointerClick, Radar, Sparkles } from "lucide-react";
+import {
+  Boxes,
+  Brain,
+  Compass,
+  Cpu,
+  Gauge,
+  MousePointerClick,
+  Radar,
+  Sparkles,
+} from "lucide-react";
 
 import { AnimatedBackdrop } from "@/components/AnimatedBackdrop";
 import { scenes } from "@/lib/scenes";
@@ -50,10 +59,26 @@ const capabilities = [
 ];
 
 const pipeline = [
-  { step: "01", label: "Navigate", text: "Orbit, pan and zoom a real-time WebGL scene rendered by React Three Fiber." },
-  { step: "02", label: "Select", text: "Click a marker; the app resolves the structure and captures your exact viewpoint." },
-  { step: "03", label: "Context assembly", text: "A server function fuses module context, element dataset and camera telemetry into a grounded prompt." },
-  { step: "04", label: "Explain", text: "The tutor answers about that structure, from that angle, and invites the next spatial question." },
+  {
+    step: "01",
+    label: "Navigate",
+    text: "Orbit, pan and zoom a real-time WebGL scene rendered by React Three Fiber.",
+  },
+  {
+    step: "02",
+    label: "Select",
+    text: "Click a marker; the app resolves the structure and captures your exact viewpoint.",
+  },
+  {
+    step: "03",
+    label: "Context assembly",
+    text: "A server function fuses module context, element dataset and camera telemetry into a grounded prompt.",
+  },
+  {
+    step: "04",
+    label: "Explain",
+    text: "The tutor answers about that structure, from that angle, and invites the next spatial question.",
+  },
 ];
 
 function Landing() {
@@ -68,18 +93,28 @@ function Landing() {
             <span className="label-mono text-primary">Immersive spatial learning</span>
           </div>
 
-          <h1 style={{ animationDelay: "80ms" }} className="animate-reveal mt-6 max-w-4xl text-4xl leading-[1.05] font-bold md:text-6xl">
+          <h1
+            style={{ animationDelay: "80ms" }}
+            className="animate-reveal mt-6 max-w-4xl text-4xl leading-[1.05] font-bold md:text-6xl"
+          >
             Stop learning three-dimensional subjects through
             <span className="text-sheen"> flat media.</span>
           </h1>
 
-          <p style={{ animationDelay: "180ms" }} className="animate-reveal mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
-            SPATIA renders anatomy, molecular chemistry and architectural history as navigable 3D environments in the
-            browser. An AI tutor tracks your viewpoint and every structure you click, then explains exactly what you are
-            looking at — with the scale and spatial relationships a textbook diagram destroys.
+          <p
+            style={{ animationDelay: "180ms" }}
+            className="animate-reveal mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg"
+          >
+            SPATIA renders anatomy, molecular chemistry and architectural history as navigable 3D
+            environments in the browser. An AI tutor tracks your viewpoint and every structure you
+            click, then explains exactly what you are looking at — with the scale and spatial
+            relationships a textbook diagram destroys.
           </p>
 
-          <div style={{ animationDelay: "280ms" }} className="animate-reveal mt-9 flex flex-wrap items-center gap-3">
+          <div
+            style={{ animationDelay: "280ms" }}
+            className="animate-reveal mt-9 flex flex-wrap items-center gap-3"
+          >
             <Link
               to="/explore/$sceneId"
               params={{ sceneId: "cardiac" }}
@@ -95,7 +130,10 @@ function Landing() {
             </Link>
           </div>
 
-          <dl style={{ animationDelay: "380ms" }} className="animate-reveal mt-14 grid max-w-3xl grid-cols-2 gap-6 md:grid-cols-4">
+          <dl
+            style={{ animationDelay: "380ms" }}
+            className="animate-reveal mt-14 grid max-w-3xl grid-cols-2 gap-6 md:grid-cols-4"
+          >
             {[
               [String(scenes.length), "Spatial modules"],
               [String(scenes.reduce((n, s) => n + s.hotspots.length, 0)), "Interactive structures"],
@@ -118,18 +156,22 @@ function Landing() {
             <p className="label-mono text-accent">The problem</p>
             <h2 className="mt-3 text-xl font-semibold">2D media breaks spatial understanding</h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Textbooks and lecture video force students to reconstruct volume, depth and adjacency in their heads. The
-              result is a persistent disconnect: learners can name the left ventricle but cannot say what sits behind
-              it, how thick its wall is relative to the right, or why that difference exists at all.
+              Textbooks and lecture video force students to reconstruct volume, depth and adjacency
+              in their heads. The result is a persistent disconnect: learners can name the left
+              ventricle but cannot say what sits behind it, how thick its wall is relative to the
+              right, or why that difference exists at all.
             </p>
           </article>
           <article className="panel card-lift p-6 hover:-translate-y-1 hover:border-primary/40">
             <p className="label-mono text-primary">The approach</p>
-            <h2 className="mt-3 text-xl font-semibold">Render the space, then explain it in place</h2>
+            <h2 className="mt-3 text-xl font-semibold">
+              Render the space, then explain it in place
+            </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              A lightweight WebGL environment does the spatial work; a viewpoint-aware LLM does the pedagogical work.
-              Because the tutor knows your camera angle, distance and current selection, it can teach relationships
-              rather than definitions — the thing flat media cannot do.
+              A lightweight WebGL environment does the spatial work; a viewpoint-aware LLM does the
+              pedagogical work. Because the tutor knows your camera angle, distance and current
+              selection, it can teach relationships rather than definitions — the thing flat media
+              cannot do.
             </p>
           </article>
         </div>
@@ -140,7 +182,9 @@ function Landing() {
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="label-mono text-primary">Learning modules</p>
-            <h2 className="mt-2 text-2xl font-semibold md:text-3xl">Six spatial subjects, one engine</h2>
+            <h2 className="mt-2 text-2xl font-semibold md:text-3xl">
+              {scenes.length} spatial subjects, one engine
+            </h2>
           </div>
           <Compass className="hidden h-6 w-6 text-muted-foreground md:block" />
         </div>
@@ -161,7 +205,9 @@ function Landing() {
               </div>
               <h3 className="mt-4 text-lg font-semibold group-hover:text-primary">{scene.title}</h3>
               <p className="mt-1 text-xs text-accent">{scene.tagline}</p>
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{scene.description}</p>
+              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">
+                {scene.description}
+              </p>
               <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-3">
                 <span className="label-mono">{scene.hotspots.length} structures</span>
                 <span className="label-mono">{scene.duration}</span>
@@ -175,10 +221,15 @@ function Landing() {
       <section className="border-y border-border/60 bg-surface/40">
         <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
           <p className="label-mono text-primary">Capabilities</p>
-          <h2 className="mt-2 text-2xl font-semibold md:text-3xl">Graphics pipeline meets LLM context awareness</h2>
+          <h2 className="mt-2 text-2xl font-semibold md:text-3xl">
+            Graphics pipeline meets LLM context awareness
+          </h2>
           <div className="mt-9 grid gap-5 sm:grid-cols-2">
             {capabilities.map((c) => (
-              <div key={c.title} className="card-lift rounded-xl border border-border/70 bg-background/40 p-5 hover:-translate-y-1 hover:border-primary/50">
+              <div
+                key={c.title}
+                className="card-lift rounded-xl border border-border/70 bg-background/40 p-5 hover:-translate-y-1 hover:border-primary/50"
+              >
                 <c.icon className="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110" />
                 <h3 className="mt-3 text-base font-semibold">{c.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.body}</p>
@@ -191,10 +242,15 @@ function Landing() {
       {/* Pipeline */}
       <section className="mx-auto max-w-6xl px-6 py-16 md:py-20">
         <p className="label-mono text-accent">Interaction loop</p>
-        <h2 className="mt-2 text-2xl font-semibold md:text-3xl">From camera coordinates to a grounded explanation</h2>
+        <h2 className="mt-2 text-2xl font-semibold md:text-3xl">
+          From camera coordinates to a grounded explanation
+        </h2>
         <ol className="mt-9 grid gap-4 md:grid-cols-4">
           {pipeline.map((p) => (
-            <li key={p.step} className="panel card-lift p-5 hover:-translate-y-1 hover:border-primary/50">
+            <li
+              key={p.step}
+              className="panel card-lift p-5 hover:-translate-y-1 hover:border-primary/50"
+            >
               <span className="font-mono text-xs text-primary">{p.step}</span>
               <h3 className="mt-2 font-display text-base font-semibold">{p.label}</h3>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.text}</p>
@@ -206,8 +262,9 @@ function Landing() {
       <footer className="border-t border-border/60">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 px-6 py-8 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
           <p>
-            <span className="font-display font-semibold text-foreground">SPATIA</span> — designed and built by{" "}
-            <span className="text-primary">Ayush Kumar</span> and <span className="text-primary">Harsh Pratap</span>.
+            <span className="font-display font-semibold text-foreground">SPATIA</span> — designed
+            and built by <span className="text-primary">Ayush Kumar</span> and{" "}
+            <span className="text-primary">Harsh Pratap</span>.
           </p>
           <Link to="/about" className="hover:text-primary">
             Technical write-up →
