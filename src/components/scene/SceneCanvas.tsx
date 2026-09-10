@@ -5,7 +5,7 @@ import * as THREE from "three";
 
 import { CathedralModel } from "./CathedralModel";
 import { BinaryTreeModel, DnaModel, LatticeModel, WaveModel } from "./ConceptModels";
-import { HeartModel } from "./HeartModel";
+import { GltfModel } from "./GltfModel";
 import { Hotspot3D } from "./Hotspot3D";
 import { MoleculeModel } from "./MoleculeModel";
 import { GearboxModel, SolarSystemModel, TectonicModel } from "./ScienceModels";
@@ -19,6 +19,14 @@ export type Viewpoint = {
 };
 
 type Controls = React.ComponentRef<typeof OrbitControls>;
+
+/** Dev aid: `?cam=x,y,z` overrides the starting camera so hotspots can be placed from set views. */
+function debugCamera(): [number, number, number] | null {
+  if (typeof window === "undefined" || !import.meta.env.DEV) return null;
+  const raw = new URLSearchParams(window.location.search).get("cam");
+  const v = raw?.split(",").map(Number) ?? [];
+  return v.length === 3 && v.every(Number.isFinite) ? (v as [number, number, number]) : null;
+}
 
 function ViewpointTracker({ onChange }: { onChange: (v: Viewpoint) => void }) {
   const camera = useThree((s) => s.camera);
@@ -119,7 +127,8 @@ function CameraRig({
 }
 
 function SceneBody({ scene, options }: { scene: SceneModule; options: Record<string, boolean> }) {
-  if (scene.id === "cardiac") return <HeartModel pulse={options["pulse"] ?? true} />;
+  if (scene.id === "cardiac")
+    return <GltfModel url="/models/heart/heart.gltf" fit={5} pulse={options["pulse"] ?? true} />;
   if (scene.id === "caffeine")
     return <MoleculeModel showHydrogens={options["hydrogens"] ?? true} />;
   if (scene.id === "cathedral") return <CathedralModel showVault={options["vault"] ?? true} />;
@@ -160,12 +169,12 @@ export function SceneCanvas({
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: scene.camera.position, fov: 45 }}
+      camera={{ position: debugCamera() ?? scene.camera.position, fov: 45 }}
       gl={{ antialias: true }}
       onPointerMissed={() => onSelectHotspot("")}
     >
-      <color attach="background" args={["#17191d"]} />
-      <fog attach="fog" args={["#17191d", 26, 70]} />
+      <color attach="background" args={["#161a22"]} />
+      <fog attach="fog" args={["#161a22", 26, 70]} />
 
       <hemisphereLight args={["#bcd7ff", "#2a2f3d", 0.55]} />
       <directionalLight

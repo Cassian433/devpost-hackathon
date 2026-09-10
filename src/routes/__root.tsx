@@ -73,11 +73,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SPATIA — Immersive 3D Learning" },
-      { name: "description", content: "Explore spatial subjects in interactive 3D with a viewpoint-aware AI tutor." },
+      { title: "Spatia — learn 3D subjects in 3D" },
+      {
+        name: "description",
+        content: "Explore spatial subjects in interactive 3D with a viewpoint-aware AI tutor.",
+      },
       { name: "author", content: "Ayush Kumar and Harsh Pratap" },
-      { property: "og:title", content: "SPATIA — Immersive 3D Learning" },
-      { property: "og:description", content: "Explore spatial subjects in interactive 3D with a viewpoint-aware AI tutor." },
+      { property: "og:title", content: "Spatia — learn 3D subjects in 3D" },
+      {
+        property: "og:description",
+        content: "Explore spatial subjects in interactive 3D with a viewpoint-aware AI tutor.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -88,7 +94,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap",
+      },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),

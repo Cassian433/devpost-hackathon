@@ -48,7 +48,7 @@ export function Hotspot3D({ hotspot, active, dimmed, index, onSelect }: Props) {
         <mesh>
           <sphereGeometry args={[0.16, 24, 24]} />
           <meshBasicMaterial
-            color={active ? "#ffc561" : "#7fe6ef"}
+            color={active ? "#e0623f" : "#efe9dc"}
             transparent
             opacity={dimmed && !hovered ? 0.55 : 1}
             toneMapped={false}
@@ -57,7 +57,7 @@ export function Hotspot3D({ hotspot, active, dimmed, index, onSelect }: Props) {
         <mesh>
           <sphereGeometry args={[0.3, 20, 20]} />
           <meshBasicMaterial
-            color={active ? "#ffc561" : "#7fe6ef"}
+            color={active ? "#e0623f" : "#efe9dc"}
             transparent
             opacity={hovered || active ? 0.28 : dimmed ? 0.06 : 0.12}
             toneMapped={false}
@@ -72,12 +72,12 @@ export function Hotspot3D({ hotspot, active, dimmed, index, onSelect }: Props) {
             showName ? "px-2.5 py-1 text-[10px]" : "px-1.5 py-0.5 text-[9px]"
           } ${
             active
-              ? "border-accent/70 bg-accent/20 text-accent opacity-100"
+              ? "border-primary bg-background text-primary opacity-100"
               : hovered
-                ? "border-primary/60 bg-background/85 text-primary opacity-100"
+                ? "border-border bg-background text-foreground opacity-100"
                 : dimmed
-                  ? "border-border/40 bg-background/50 text-muted-foreground opacity-45"
-                  : "border-border/60 bg-background/70 text-muted-foreground opacity-80"
+                  ? "border-ink-foreground/20 bg-ink/70 text-ink-foreground/70 opacity-45"
+                  : "border-ink-foreground/25 bg-ink/70 text-ink-foreground/85 opacity-90"
           }`}
           style={{ transform: showName ? "translateY(-2.2rem)" : "translateY(-1.7rem)" }}
         >

@@ -83,9 +83,9 @@ export function TutorPanel({ scene, hotspot, viewpoint }: Props) {
             <span className="absolute inline-flex h-full w-full rounded-full bg-primary animate-pulse-ring" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
           </span>
-          <span className="font-display text-sm font-semibold">Spatial AI Tutor</span>
+          <span className="font-display text-lg">Tutor</span>
         </div>
-        <span className="label-mono">context aware</span>
+        <span className="label-mono">viewpoint aware</span>
       </div>
 
       <div className="flex items-start gap-2 border-b border-border/70 bg-secondary/40 px-4 py-2.5">

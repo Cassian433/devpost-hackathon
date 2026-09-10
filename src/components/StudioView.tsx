@@ -147,7 +147,7 @@ export function StudioView({ scene }: { scene: SceneModule }) {
         </aside>
 
         {/* Viewport */}
-        <section className="panel relative order-1 min-h-[45vh] overflow-hidden lg:order-2">
+        <section className="chamber relative order-1 min-h-[45vh] overflow-hidden lg:order-2">
           <SceneCanvas
             key={key}
             scene={scene}
@@ -158,13 +158,15 @@ export function StudioView({ scene }: { scene: SceneModule }) {
             autoRotate={autoRotate}
           />
           <div className="pointer-events-none absolute left-4 top-4 max-w-xs">
-            <p className="label-mono">{scene.accentLabel} module</p>
-            <p className="mt-1 text-xs text-muted-foreground">{scene.tagline}</p>
+            <p className="label-mono text-ink-foreground/55">{scene.accentLabel} module</p>
+            <p className="mt-1 font-display text-base italic text-ink-foreground/85">
+              {scene.tagline}
+            </p>
           </div>
           {hotspot ? (
-            <div className="pointer-events-none absolute bottom-4 left-4 right-4 rounded-xl border border-accent/40 bg-background/80 p-3 backdrop-blur-md md:max-w-md">
-              <p className="label-mono text-accent">{hotspot.category}</p>
-              <p className="mt-1 font-display text-sm font-semibold">{hotspot.name}</p>
+            <div className="pointer-events-none absolute bottom-4 left-4 right-4 rounded-md border border-border bg-background/95 p-4 shadow-lg md:max-w-md">
+              <p className="eyebrow">{hotspot.category}</p>
+              <p className="mt-1 font-display text-2xl leading-none">{hotspot.name}</p>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 {hotspot.summary}
               </p>
@@ -180,7 +182,7 @@ export function StudioView({ scene }: { scene: SceneModule }) {
               </ul>
             </div>
           ) : (
-            <p className="pointer-events-none absolute bottom-4 left-4 text-xs text-muted-foreground">
+            <p className="pointer-events-none absolute bottom-4 left-4 text-xs text-ink-foreground/55">
               Drag to orbit · scroll to zoom · click a marker or press 1–
               {Math.min(9, scene.hotspots.length)} · Esc clears
             </p>

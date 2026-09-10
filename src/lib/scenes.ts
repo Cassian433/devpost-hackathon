@@ -41,7 +41,7 @@ export const scenes: SceneModule[] = [
       {
         id: "left-ventricle",
         name: "Left Ventricle",
-        position: [-1.05, -0.85, 0.55],
+        position: [0.85, -1.05, 0.6],
         category: "Chamber",
         summary:
           "The high-pressure pump of the systemic circuit, with a myocardial wall roughly three times thicker than the right ventricle.",
@@ -54,7 +54,7 @@ export const scenes: SceneModule[] = [
       {
         id: "right-ventricle",
         name: "Right Ventricle",
-        position: [1.15, -0.8, 0.6],
+        position: [-0.55, -0.95, 1.0],
         category: "Chamber",
         summary:
           "A thin-walled, crescent-shaped chamber that drives blood a short distance into the low-resistance pulmonary circuit.",
@@ -63,7 +63,7 @@ export const scenes: SceneModule[] = [
       {
         id: "left-atrium",
         name: "Left Atrium",
-        position: [-1.0, 0.95, -0.35],
+        position: [1.2, 0.75, -0.45],
         category: "Chamber",
         summary:
           "Receives oxygenated blood from four pulmonary veins and delivers it across the mitral valve during diastole.",
@@ -72,7 +72,7 @@ export const scenes: SceneModule[] = [
       {
         id: "right-atrium",
         name: "Right Atrium",
-        position: [1.1, 1.0, -0.3],
+        position: [-1.15, 0.35, 0.5],
         category: "Chamber",
         summary:
           "Collection chamber for systemic venous return via the superior and inferior vena cava; houses the sinoatrial node.",
@@ -81,7 +81,7 @@ export const scenes: SceneModule[] = [
       {
         id: "aorta",
         name: "Aortic Arch",
-        position: [-0.35, 2.35, -0.1],
+        position: [-0.1, 2.1, -0.3],
         category: "Great Vessel",
         summary:
           "The body's largest artery. Its elastic recoil during diastole maintains perfusion pressure between beats — the Windkessel effect.",
@@ -90,7 +90,7 @@ export const scenes: SceneModule[] = [
       {
         id: "pulmonary-artery",
         name: "Pulmonary Trunk",
-        position: [0.75, 2.15, 0.45],
+        position: [0.6, 1.6, 0.5],
         category: "Great Vessel",
         summary:
           "The only artery in the adult body carrying deoxygenated blood, bifurcating toward each lung for gas exchange.",
@@ -99,7 +99,7 @@ export const scenes: SceneModule[] = [
       {
         id: "coronary",
         name: "Coronary Arteries",
-        position: [-1.55, 0.15, 1.05],
+        position: [0.25, -0.3, 1.15],
         category: "Perfusion",
         summary:
           "Vessels that perfuse the myocardium itself, filling paradoxically during diastole when the muscle relaxes.",
@@ -108,7 +108,7 @@ export const scenes: SceneModule[] = [
       {
         id: "mitral-valve",
         name: "Mitral Valve",
-        position: [-0.9, 0.2, 0.9],
+        position: [0.9, 0.05, 0.45],
         category: "Valve",
         summary:
           "The bicuspid atrioventricular valve, tethered by chordae tendineae to papillary muscles that prevent prolapse under pressure.",

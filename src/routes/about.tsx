@@ -1,22 +1,19 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Layers3, Radar, ShieldCheck, Users } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+
+import { SiteNav } from "@/components/SiteNav";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "How SPATIA Works — Architecture & Team" },
+      { title: "How Spatia works" },
       {
         name: "description",
         content:
-          "The engineering behind SPATIA: a React Three Fiber rendering pipeline, viewpoint telemetry, and a server-side AI tutor grounded in per-structure datasets.",
+          "The engineering behind Spatia: a React Three Fiber rendering pipeline, viewpoint telemetry, and a server-side AI tutor grounded in per-structure reference data.",
       },
-      { property: "og:title", content: "How SPATIA Works — Architecture & Team" },
-      {
-        property: "og:description",
-        content: "Rendering pipeline, viewpoint telemetry and grounded AI tutoring, explained. By Ayush Kumar and Harsh Pratap.",
-      },
+      { property: "og:title", content: "How Spatia works" },
       { property: "og:type", content: "article" },
-      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: About,
@@ -24,95 +21,95 @@ export const Route = createFileRoute("/about")({
 
 const layers = [
   {
-    icon: Layers3,
-    title: "Rendering layer",
+    title: "Rendering",
     points: [
-      "React Three Fiber over WebGL2, one shadow-casting directional light plus local Lightformer IBL — no CDN HDR fetches.",
-      "Models are procedural: Catmull-Rom tube geometry for great vessels and Gothic ribs, physical materials with clearcoat and sheen for tissue.",
-      "Pixel ratio capped at 2, 2048px shadow map, geometry reused across markers to stay inside a mobile draw budget.",
+      "React Three Fiber over WebGL2. One shadow-casting directional light plus a small light-former environment, no external HDR downloads.",
+      "Models are procedural: Catmull-Rom tube geometry for vessels and Gothic ribs, physical materials with clearcoat and sheen for tissue.",
+      "Pixel ratio capped at 2 and a single 2048px shadow map keep every module inside a laptop-GPU budget.",
     ],
   },
   {
-    icon: Radar,
-    title: "Spatial context layer",
+    title: "Spatial context",
     points: [
-      "A tracker samples the camera every 320 ms and derives distance, orbit azimuth and polar elevation, emitting only on meaningful change.",
-      "Raycast picks resolve to a hotspot id with a curated dataset: category, summary and verified key facts.",
-      "Telemetry is translated into natural language (\"left side, from above, medium range\") before it reaches the model.",
+      "A tracker samples the camera a few times a second and derives distance, orbit azimuth and elevation, emitting only on meaningful change.",
+      "Each labelled structure carries a curated dataset: category, summary and key facts. Picking one resolves to that record.",
+      'Telemetry is translated to plain language ("rear, from above, medium range") before it reaches the model, so the tutor can reason about it.',
     ],
   },
   {
-    icon: ShieldCheck,
-    title: "AI layer",
+    title: "Tutoring",
     points: [
-      "A TanStack server function owns the model call; the API key never touches the browser bundle.",
-      "The prompt carries module pedagogy, the full element inventory, the selected structure's dataset and the viewpoint description.",
-      "Streaming generation keeps long answers inside platform timeouts; gateway rate-limit and credit errors surface directly in the UI.",
+      "A single server function owns the model call. The API key never reaches the browser.",
+      "The prompt carries the module's teaching brief, the full structure inventory, the selected structure's facts and the viewpoint description.",
+      "With no key configured, the same panel shows the structure's reference notes instead of failing, so the studio always works.",
     ],
   },
 ];
 
+const team = [
+  { name: "Ayush Kumar", role: "3D scenes and interaction" },
+  { name: "Harsh Pratap", role: "AI context pipeline and application architecture" },
+  { name: "Sarthak", role: "Platform, tutor features, release" },
+];
+
 function About() {
   return (
-    <main className="mx-auto max-w-4xl px-6 py-16 md:py-20">
-      <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary">
-        <ArrowLeft className="h-4 w-4" /> Back to library
-      </Link>
+    <main>
+      <SiteNav />
+      <article className="mx-auto max-w-3xl px-6 py-16 md:py-20">
+        <p className="eyebrow">How it works</p>
+        <h1 className="mt-3 text-4xl leading-tight md:text-5xl">Three layers, one loop</h1>
+        <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+          Spatia is deliberately lightweight: no native app, no headset, no asset pipeline.
+          Everything runs in a browser tab, which is what makes it usable in a classroom of mixed
+          devices while still being genuinely spatial.
+        </p>
 
-      <p className="label-mono mt-8 text-primary">Technical write-up</p>
-      <h1 className="mt-2 text-3xl font-bold md:text-4xl">Three layers, one continuous learning loop</h1>
-      <p className="mt-5 text-base leading-relaxed text-muted-foreground">
-        SPATIA is deliberately lightweight: no native app, no headset, no asset pipeline to install. Everything runs in a
-        browser tab, which is what makes it deployable to a classroom of mixed devices while still delivering a
-        genuinely spatial experience.
-      </p>
-
-      <div className="mt-12 space-y-5">
-        {layers.map((l) => (
-          <section key={l.title} className="panel p-6">
-            <div className="flex items-center gap-2">
-              <l.icon className="h-5 w-5 text-primary" />
-              <h2 className="text-lg font-semibold">{l.title}</h2>
-            </div>
-            <ul className="mt-4 space-y-2.5">
-              {l.points.map((p) => (
-                <li key={p} className="flex gap-3 text-sm leading-relaxed text-muted-foreground">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
-                  {p}
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))}
-      </div>
-
-      <section className="panel mt-8 p-6">
-        <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-accent" />
-          <h2 className="text-lg font-semibold">Project team</h2>
-        </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {[
-            { name: "Ayush Kumar", role: "Design & 3D interaction engineering" },
-            { name: "Harsh Pratap", role: "AI context pipeline & application architecture" },
-          ].map((m) => (
-            <div key={m.name} className="rounded-xl border border-border/70 bg-background/40 p-4">
-              <p className="font-display text-base font-semibold">{m.name}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{m.role}</p>
-            </div>
+        <div className="mt-14 space-y-12">
+          {layers.map((l, i) => (
+            <section key={l.title} className="grid gap-4 md:grid-cols-[120px_1fr]">
+              <div>
+                <span className="font-display text-3xl text-primary">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h2 className="mt-1 text-2xl">{l.title}</h2>
+              </div>
+              <ul className="space-y-3 md:pt-2">
+                {l.points.map((p) => (
+                  <li
+                    key={p}
+                    className="hairline pt-3 text-sm leading-relaxed text-muted-foreground first:border-0 first:pt-0"
+                  >
+                    {p}
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
         </div>
-      </section>
 
-      <div className="mt-10">
-        <Link
-          to="/explore/$sceneId"
-          params={{ sceneId: "cathedral" }}
-          className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90"
-        >
-          Open the architecture module
-        </Link>
-      </div>
+        <section className="hairline mt-16 pt-10">
+          <p className="eyebrow">Team</p>
+          <ul className="mt-4 grid gap-6 sm:grid-cols-3">
+            {team.map((m) => (
+              <li key={m.name}>
+                <p className="font-display text-xl">{m.name}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{m.role}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <div className="mt-14">
+          <Link
+            to="/explore/$sceneId"
+            params={{ sceneId: "cathedral" }}
+            className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-3 text-sm font-medium text-primary-foreground hover:opacity-90"
+          >
+            Open the cathedral module <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </article>
     </main>
   );
 }

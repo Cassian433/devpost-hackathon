@@ -23,7 +23,11 @@ const BST: TreeNode = {
       position: [2.4, 0.9, 0],
       children: [
         { value: 62, position: [1.2, -0.8, 0] },
-        { value: 88, position: [3.6, -0.8, 0], children: [{ value: 95, position: [4.6, -2.4, 0] }] },
+        {
+          value: 88,
+          position: [3.6, -0.8, 0],
+          children: [{ value: 95, position: [4.6, -2.4, 0] }],
+        },
       ],
     },
   ],
@@ -34,8 +38,15 @@ function Edge({ from, to }: { from: [number, number, number]; to: [number, numbe
     const a = new THREE.Vector3(...from);
     const b = new THREE.Vector3(...to);
     const dir = new THREE.Vector3().subVectors(b, a);
-    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
-    return { position: new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5), quaternion: q, length: dir.length() };
+    const q = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0),
+      dir.clone().normalize(),
+    );
+    return {
+      position: new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5),
+      quaternion: q,
+      length: dir.length(),
+    };
   }, [from, to]);
 
   return (
@@ -112,7 +123,11 @@ export function DnaModel({ unwind = false }: { unwind?: boolean }) {
             <Edge from={[x1, y, z1]} to={[x2, y, z2]} />
             <mesh position={[(x1 + x2) / 2, y, (z1 + z2) / 2]}>
               <sphereGeometry args={[0.14, 16, 16]} />
-              <meshStandardMaterial color={pairColor} emissive={pairColor} emissiveIntensity={0.35} />
+              <meshStandardMaterial
+                color={pairColor}
+                emissive={pairColor}
+                emissiveIntensity={0.35}
+              />
             </mesh>
           </group>
         );
@@ -149,7 +164,13 @@ export function WaveModel({ twoSources = true }: { twoSources?: boolean }) {
   return (
     <group rotation={[-Math.PI / 2.2, 0, 0]} position={[0, -0.6, 0]}>
       <mesh ref={mesh} geometry={geometry} castShadow receiveShadow>
-        <meshStandardMaterial color="#3f7fb8" metalness={0.35} roughness={0.3} wireframe={false} side={THREE.DoubleSide} />
+        <meshStandardMaterial
+          color="#3f7fb8"
+          metalness={0.35}
+          roughness={0.3}
+          wireframe={false}
+          side={THREE.DoubleSide}
+        />
       </mesh>
       <mesh position={[-2.4, 0, 0.6]}>
         <sphereGeometry args={[0.22, 20, 20]} />
@@ -186,7 +207,11 @@ export function LatticeModel({ showBonds = true }: { showBonds?: boolean }) {
       {cells.map((c) => (
         <mesh key={c.key} position={c.position} castShadow>
           <sphereGeometry args={[c.sodium ? 0.34 : 0.5, 24, 24]} />
-          <meshStandardMaterial color={c.sodium ? "#e0b155" : "#4fd0e0"} roughness={0.35} metalness={0.1} />
+          <meshStandardMaterial
+            color={c.sodium ? "#e0b155" : "#4fd0e0"}
+            roughness={0.35}
+            metalness={0.1}
+          />
         </mesh>
       ))}
       {showBonds

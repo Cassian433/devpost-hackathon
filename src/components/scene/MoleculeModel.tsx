@@ -69,8 +69,15 @@ const bonds: [number, number, number][] = [
 function Bond({ a, b, order }: { a: THREE.Vector3; b: THREE.Vector3; order: number }) {
   const { mid, quat, len } = useMemo(() => {
     const dir = new THREE.Vector3().subVectors(b, a);
-    const q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
-    return { mid: new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5), quat: q, len: dir.length() };
+    const q = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0),
+      dir.clone().normalize(),
+    );
+    return {
+      mid: new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5),
+      quat: q,
+      len: dir.length(),
+    };
   }, [a, b]);
 
   const offsets = order === 2 ? [-0.09, 0.09] : [0];
@@ -98,7 +105,13 @@ export function MoleculeModel({ showHydrogens }: { showHydrogens: boolean }) {
         return (
           <mesh key={i} position={atom.p} castShadow receiveShadow>
             <sphereGeometry args={[s.radius, 40, 40]} />
-            <meshPhysicalMaterial color={s.color} roughness={0.28} clearcoat={0.8} clearcoatRoughness={0.2} metalness={0.1} />
+            <meshPhysicalMaterial
+              color={s.color}
+              roughness={0.28}
+              clearcoat={0.8}
+              clearcoatRoughness={0.2}
+              metalness={0.1}
+            />
           </mesh>
         );
       })}

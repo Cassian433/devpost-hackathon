@@ -5,21 +5,22 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * SPATIA design system — an instrument-panel aesthetic for a 3D learning studio.
- * Deep observatory blues, cyan instrument glow, amber highlight for focus.
+ * SPATIA design system — a scientific atlas.
+ * Warm paper, ink type, one vermilion accent for action, deep teal for the tutor.
+ * The 3D viewport is the one dark surface: a specimen chamber set into the page.
  * All colors are oklch semantic tokens. Never hardcode colors in components.
  */
 
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
-  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -42,66 +43,52 @@
   --color-ring: var(--ring);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
   --color-grid: var(--grid);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 0.375rem;
 
-  --background: oklch(0.17 0.03 250);
-  --foreground: oklch(0.96 0.01 240);
+  --background: oklch(0.975 0.007 85);
+  --foreground: oklch(0.2 0.02 262);
 
-  --surface: oklch(0.21 0.032 252);
-  --surface-raised: oklch(0.25 0.035 253);
+  --surface: oklch(0.992 0.004 85);
+  --surface-raised: oklch(0.955 0.009 85);
 
-  --card: oklch(0.21 0.032 252);
-  --card-foreground: oklch(0.96 0.01 240);
-  --popover: oklch(0.23 0.033 252);
-  --popover-foreground: oklch(0.96 0.01 240);
+  --card: oklch(0.992 0.004 85);
+  --card-foreground: oklch(0.2 0.02 262);
+  --popover: oklch(0.992 0.004 85);
+  --popover-foreground: oklch(0.2 0.02 262);
 
-  --primary: oklch(0.78 0.13 195);
-  --primary-foreground: oklch(0.17 0.03 250);
-  --primary-glow: oklch(0.88 0.11 190);
+  --primary: oklch(0.56 0.19 32);
+  --primary-foreground: oklch(0.985 0.005 85);
+  --primary-glow: oklch(0.7 0.16 40);
 
-  --secondary: oklch(0.28 0.035 253);
-  --secondary-foreground: oklch(0.93 0.012 240);
+  --secondary: oklch(0.935 0.01 85);
+  --secondary-foreground: oklch(0.25 0.02 262);
 
-  --muted: oklch(0.26 0.03 253);
-  --muted-foreground: oklch(0.7 0.025 250);
+  --muted: oklch(0.935 0.01 85);
+  --muted-foreground: oklch(0.47 0.02 262);
 
-  --accent: oklch(0.82 0.15 78);
-  --accent-foreground: oklch(0.18 0.03 250);
+  --accent: oklch(0.48 0.09 205);
+  --accent-foreground: oklch(0.985 0.005 85);
 
-  --destructive: oklch(0.63 0.2 22);
-  --destructive-foreground: oklch(0.97 0.01 240);
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(0.985 0.005 85);
 
-  --border: oklch(0.32 0.03 253);
-  --input: oklch(0.3 0.03 253);
-  --ring: oklch(0.78 0.13 195);
-  --grid: oklch(0.35 0.04 253);
+  --border: oklch(0.86 0.013 85);
+  --input: oklch(0.88 0.012 85);
+  --ring: oklch(0.56 0.19 32);
+  --grid: oklch(0.82 0.014 85);
 
-  --chart-1: oklch(0.78 0.13 195);
-  --chart-2: oklch(0.82 0.15 78);
-  --chart-3: oklch(0.68 0.16 330);
-  --chart-4: oklch(0.72 0.15 145);
-  --chart-5: oklch(0.7 0.15 265);
+  --ink: oklch(0.19 0.022 262);
+  --ink-foreground: oklch(0.95 0.008 85);
 
-  --gradient-deep: radial-gradient(
-    120% 100% at 50% 0%,
-    oklch(0.26 0.05 240) 0%,
-    oklch(0.17 0.03 250) 55%,
-    oklch(0.14 0.025 255) 100%
-  );
-  --gradient-instrument: linear-gradient(135deg, var(--primary) 0%, var(--primary-glow) 100%);
-  --gradient-focus: linear-gradient(135deg, var(--accent) 0%, oklch(0.86 0.13 60) 100%);
-  --shadow-panel: 0 24px 60px -28px oklch(0.08 0.02 250 / 0.9);
-  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent),
-    0 12px 40px -12px color-mix(in oklab, var(--primary) 45%, transparent);
+  --shadow-panel: 0 1px 0 oklch(1 0 0 / 0.6) inset, 0 1px 2px oklch(0.2 0.02 262 / 0.06);
+  --shadow-chamber: inset 0 0 0 1px oklch(1 0 0 / 0.04), inset 0 30px 60px -30px oklch(0 0 0 / 0.6);
+  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--primary) 40%, transparent);
 }
 
 @layer base {
@@ -109,51 +96,97 @@
     border-color: var(--color-border);
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: var(--color-background);
-    background-image: var(--gradient-deep);
-    background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
   }
 
   h1,
   h2,
-  h3,
-  h4 {
+  h3 {
     font-family: var(--font-display);
-    letter-spacing: -0.02em;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 22%, transparent);
   }
 }
 
+/* Panels: paper cards with a hairline rule. */
 @utility panel {
-  background-color: color-mix(in oklab, var(--surface) 88%, transparent);
+  background-color: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-panel);
-  backdrop-filter: blur(14px);
 }
 
-@utility text-gradient-instrument {
-  background-image: var(--gradient-instrument);
-  background-clip: text;
-  color: transparent;
+/* The one dark surface. */
+@utility chamber {
+  background-color: var(--ink);
+  color: var(--ink-foreground);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-chamber);
 }
 
 @utility label-mono {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted-foreground);
 }
 
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+/* Fade only the decorative grid so content stays fully visible. */
 @utility grid-backdrop {
-  background-image:
-    linear-gradient(to right, color-mix(in oklab, var(--grid) 22%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--grid) 22%, transparent) 1px, transparent 1px);
-  background-size: 56px 56px;
+  position: relative;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+      linear-gradient(
+        to right,
+        color-mix(in oklab, var(--grid) 45%, transparent) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        color-mix(in oklab, var(--grid) 45%, transparent) 1px,
+        transparent 1px
+      );
+    background-size: 48px 48px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 0%, black 30%, transparent 100%);
+  }
+}
+
+@utility hairline {
+  border-top: 1px solid var(--border);
+}
+
+@utility text-sheen {
+  color: var(--primary);
+  font-style: italic;
 }
 
 @keyframes pulse-ring {
@@ -174,92 +207,26 @@
   animation: pulse-ring 2.2s ease-out infinite;
 }
 
-/* ---------- Motion layer: animated backdrop + reveal utilities ---------- */
-
-@keyframes aurora-drift {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  33% { transform: translate3d(6%, -4%, 0) scale(1.12); }
-  66% { transform: translate3d(-5%, 5%, 0) scale(0.94); }
-  100% { transform: translate3d(0, 0, 0) scale(1); }
-}
-
-@keyframes grid-pan {
-  0% { background-position: 0 0; }
-  100% { background-position: 56px 56px; }
-}
-
-@keyframes float-up {
-  0% { transform: translateY(0) scale(1); opacity: 0; }
-  12% { opacity: 0.8; }
-  88% { opacity: 0.5; }
-  100% { transform: translateY(-120vh) scale(1.25); opacity: 0; }
-}
-
 @keyframes reveal-up {
-  from { opacity: 0; transform: translateY(22px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes sheen {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-
-@utility aurora-orb {
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(70px);
-  opacity: 0.4;
-  animation: aurora-drift 22s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@utility grid-drift {
-  background-image:
-    linear-gradient(to right, color-mix(in oklab, var(--grid) 20%, transparent) 1px, transparent 1px),
-    linear-gradient(to bottom, color-mix(in oklab, var(--grid) 20%, transparent) 1px, transparent 1px);
-  background-size: 56px 56px;
-  animation: grid-pan 18s linear infinite;
-}
-
-@utility spark {
-  position: absolute;
-  border-radius: 9999px;
-  background-color: color-mix(in oklab, var(--primary) 75%, transparent);
-  box-shadow: 0 0 10px color-mix(in oklab, var(--primary) 60%, transparent);
-  animation: float-up linear infinite;
-  pointer-events: none;
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @utility animate-reveal {
-  animation: reveal-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@utility text-sheen {
-  background-image: linear-gradient(
-    100deg,
-    var(--primary) 0%,
-    var(--primary-glow) 25%,
-    var(--accent) 50%,
-    var(--primary-glow) 75%,
-    var(--primary) 100%
-  );
-  background-size: 200% 100%;
-  background-clip: text;
-  color: transparent;
-  animation: sheen 7s linear infinite;
+  animation: reveal-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @utility card-lift {
   transition:
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.35s ease,
-    border-color 0.35s ease;
-}
-
-@utility card-lift-hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-glow);
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {

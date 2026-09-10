@@ -56,10 +56,7 @@ function CompoundPier({ x, z }: { x: number; z: number }) {
 }
 
 function FlyingButtress({ side }: { side: 1 | -1 }) {
-  const curve = useMemo(
-    () => ribCurve([side * 3.9, 7.4, 0], [side * 7.4, 3.6, 0], 8.4),
-    [side],
-  );
+  const curve = useMemo(() => ribCurve([side * 3.9, 7.4, 0], [side * 7.4, 3.6, 0], 8.4), [side]);
   return (
     <group>
       <mesh castShadow>
@@ -78,7 +75,19 @@ function FlyingButtress({ side }: { side: 1 | -1 }) {
   );
 }
 
-function GlassWindow({ x, y, w, h, tint }: { x: number; y: number; w: number; h: number; tint: string }) {
+function GlassWindow({
+  x,
+  y,
+  w,
+  h,
+  tint,
+}: {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  tint: string;
+}) {
   return (
     <group position={[x, y, 0]} rotation={[0, Math.PI / 2, 0]}>
       <mesh>
