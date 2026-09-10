@@ -9,13 +9,19 @@ import type { Viewpoint } from "./scene/SceneCanvas";
 
 type Turn = { role: "user" | "assistant"; content: string; focus?: string; offline?: boolean };
 
+/** Text pushed into the panel by the guided tour, keyed so each stop appends once. */
+export type Narration = { key: string; focus: string; text: string; offline: boolean };
+
 type Props = {
   scene: SceneModule;
   hotspot: Hotspot | null;
   viewpoint: Viewpoint | null;
+  narration?: Narration | null;
+  /** While a tour or quiz runs, selecting a structure must not trigger an automatic brief. */
+  quiet?: boolean;
 };
 
-export function TutorPanel({ scene, hotspot, viewpoint }: Props) {
+export function TutorPanel({ scene, hotspot, viewpoint, narration = null, quiet = false }: Props) {
   const ask = useServerFn(askTutor);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [draft, setDraft] = useState("");
@@ -50,10 +56,27 @@ export function TutorPanel({ scene, hotspot, viewpoint }: Props) {
   useEffect(() => {
     if (!hotspot || lastAuto.current === hotspot.id) return;
     lastAuto.current = hotspot.id;
+    if (quiet) return;
     setTurns((t) => [...t, { role: "user", content: `Selected: ${hotspot.name}` }]);
     mutation.mutate({ hotspotId: hotspot.id });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hotspot?.id]);
+
+  // Guided-tour narration arrives from the studio; append each stop as a tutor turn.
+  const lastNarration = useRef<string | null>(null);
+  useEffect(() => {
+    if (!narration || lastNarration.current === narration.key) return;
+    lastNarration.current = narration.key;
+    setTurns((t) => [
+      ...t,
+      {
+        role: "assistant",
+        content: narration.text,
+        focus: narration.focus,
+        offline: narration.offline,
+      },
+    ]);
+  }, [narration]);
 
   useEffect(() => {
     scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });

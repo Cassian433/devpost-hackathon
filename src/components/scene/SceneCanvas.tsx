@@ -72,10 +72,13 @@ const FLIGHT_SECONDS = 0.9;
 function CameraRig({
   controls,
   focus,
+  approach,
   sceneScale,
 }: {
   controls: RefObject<Controls | null>;
   focus: [number, number, number] | null;
+  /** Optional direction to view the focus from (tour stops); otherwise keep the current angle. */
+  approach: [number, number, number] | null;
   sceneScale: number;
 }) {
   const camera = useThree((s) => s.camera);
@@ -91,12 +94,12 @@ function CameraRig({
     return () => c.removeEventListener("start", cancel);
   }, [controls]);
 
-  const focusKey = focus ? focus.join(",") : null;
+  const focusKey = focus ? `${focus.join(",")}|${approach?.join(",") ?? ""}` : null;
   useEffect(() => {
     const c = controls.current;
     if (!focus || !c) return;
     const toTarget = new THREE.Vector3(...focus);
-    const dir = camera.position.clone().sub(c.target);
+    const dir = approach ? new THREE.Vector3(...approach) : camera.position.clone().sub(c.target);
     if (dir.lengthSq() < 1e-6) dir.set(0.4, 0.35, 1);
     dir.normalize();
     // Frame the neighbourhood, not the surface: far enough out that adjacent structures stay in view.
@@ -149,6 +152,7 @@ type Props = {
   onViewpoint: (v: Viewpoint) => void;
   options: Record<string, boolean>;
   autoRotate: boolean;
+  approach?: [number, number, number] | null;
 };
 
 export function SceneCanvas({
@@ -158,6 +162,7 @@ export function SceneCanvas({
   onViewpoint,
   options,
   autoRotate,
+  approach = null,
 }: Props) {
   const controls = useRef<Controls>(null);
   const active = scene.hotspots.find((h) => h.id === activeHotspot) ?? null;
@@ -233,7 +238,12 @@ export function SceneCanvas({
         autoRotate={autoRotate}
         autoRotateSpeed={0.55}
       />
-      <CameraRig controls={controls} focus={active?.position ?? null} sceneScale={sceneScale} />
+      <CameraRig
+        controls={controls}
+        focus={active?.position ?? null}
+        approach={approach}
+        sceneScale={sceneScale}
+      />
       <ViewpointTracker onChange={onViewpoint} />
     </Canvas>
   );

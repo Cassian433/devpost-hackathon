@@ -1,10 +1,27 @@
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft, Layers, Orbit, RotateCcw, Sliders } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
+  ListChecks,
+  Loader2,
+  Orbit,
+  Pause,
+  Play,
+  RotateCcw,
+  Route as RouteIcon,
+  Sliders,
+  X,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import { SceneCanvas, type Viewpoint } from "./scene/SceneCanvas";
-import { TutorPanel } from "./TutorPanel";
+import { TutorPanel, type Narration } from "./TutorPanel";
+import { buildQuiz, type QuizSet } from "@/lib/quiz.functions";
 import type { SceneModule } from "@/lib/scenes";
+import { planTour, type TourPlan, type TourStop } from "@/lib/tour.functions";
 
 const SCENE_TOGGLES: Record<string, { key: string; label: string }[]> = {
   cardiac: [{ key: "pulse", label: "Cardiac cycle animation" }],
@@ -15,7 +32,22 @@ const SCENE_TOGGLES: Record<string, { key: string; label: string }[]> = {
   lattice: [{ key: "bonds", label: "Show ionic bonds" }],
 };
 
+/** Camera approach direction for each side the tour planner can ask for. */
+const LOOK_FROM: Record<TourStop["lookFrom"], [number, number, number]> = {
+  front: [0.15, 0.35, 1],
+  rear: [-0.15, 0.35, -1],
+  left: [-1, 0.35, 0.2],
+  right: [1, 0.35, 0.2],
+  above: [0.2, 1, 0.35],
+};
+
+type Tour = { plan: TourPlan; index: number; playing: boolean };
+type Quiz = { set: QuizSet; index: number; picked: string | null; correct: number };
+
 export function StudioView({ scene }: { scene: SceneModule }) {
+  const plan = useServerFn(planTour);
+  const quizFn = useServerFn(buildQuiz);
+
   const [activeId, setActiveId] = useState<string | null>(null);
   const [viewpoint, setViewpoint] = useState<Viewpoint | null>(null);
   const [autoRotate, setAutoRotate] = useState(false);
@@ -24,90 +56,255 @@ export function StudioView({ scene }: { scene: SceneModule }) {
   );
   const [key, setKey] = useState(0);
 
+  const [tour, setTour] = useState<Tour | null>(null);
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [busy, setBusy] = useState<"tour" | "quiz" | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [approach, setApproach] = useState<[number, number, number] | null>(null);
+  const [narration, setNarration] = useState<Narration | null>(null);
+
   const hotspot = useMemo(
     () => scene.hotspots.find((h) => h.id === activeId) ?? null,
     [scene, activeId],
   );
-  const onViewpoint = useCallback((v: Viewpoint) => setViewpoint(v), []);
-  const onSelect = useCallback((id: string) => setActiveId(id === "" ? null : id), []);
+  const stop = tour ? tour.plan.stops[tour.index] : undefined;
+  const question = quiz ? quiz.set.questions[quiz.index] : undefined;
+  const quizDone = quiz ? quiz.index >= quiz.set.questions.length : false;
 
-  // Keyboard: 1–9 jump to a structure, Esc clears. Ignored while typing in the tutor box.
+  /* ---------------- Guided tour ---------------- */
+
+  async function startTour() {
+    if (busy) return;
+    setError(null);
+    setBusy("tour");
+    setQuiz(null);
+    try {
+      const p = await plan({ data: { sceneId: scene.id } });
+      if (!p.stops.length) throw new Error("The tour planner returned no stops.");
+      setNarration({
+        key: `intro-${Date.now()}`,
+        focus: "Guided tour",
+        text: p.intro,
+        offline: p.offline,
+      });
+      setTour({ plan: p, index: 0, playing: true });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function endTour() {
+    setTour(null);
+    setApproach(null);
+    setActiveId(null);
+  }
+
+  // Each stop: fly the camera from the planned side and hand the narration to the tutor panel.
+  useEffect(() => {
+    if (!tour || !stop) return;
+    setActiveId(stop.hotspotId);
+    setApproach(LOOK_FROM[stop.lookFrom]);
+    setNarration({
+      key: `${tour.index}-${stop.hotspotId}`,
+      focus: `Stop ${tour.index + 1} of ${tour.plan.stops.length} · ${stop.title}`,
+      text: stop.narration,
+      offline: tour.plan.offline,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tour?.index, stop?.hotspotId]);
+
+  // Auto-advance while playing; reading time scales with narration length.
+  useEffect(() => {
+    if (!tour?.playing || !stop) return;
+    const words = stop.narration.split(/\s+/).length;
+    const ms = Math.min(14000, Math.max(6000, 2500 + words * 320));
+    const id = setTimeout(() => {
+      setTour((t) =>
+        t
+          ? t.index < t.plan.stops.length - 1
+            ? { ...t, index: t.index + 1 }
+            : { ...t, playing: false }
+          : t,
+      );
+    }, ms);
+    return () => clearTimeout(id);
+  }, [tour?.index, tour?.playing, stop]);
+
+  const stepTour = (delta: number) =>
+    setTour((t) =>
+      t
+        ? {
+            ...t,
+            index: Math.min(t.plan.stops.length - 1, Math.max(0, t.index + delta)),
+            playing: false,
+          }
+        : t,
+    );
+
+  /* ---------------- Quiz ---------------- */
+
+  async function startQuiz() {
+    if (busy) return;
+    setError(null);
+    setBusy("quiz");
+    setTour(null);
+    setApproach(null);
+    setActiveId(null);
+    try {
+      const set = await quizFn({ data: { sceneId: scene.id, count: 5 } });
+      if (!set.questions.length) throw new Error("The quiz builder returned no questions.");
+      setQuiz({ set, index: 0, picked: null, correct: 0 });
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function answer(id: string) {
+    if (!quiz || !question || quiz.picked) return;
+    const ok = id === question.answerHotspotId;
+    setQuiz({ ...quiz, picked: id, correct: quiz.correct + (ok ? 1 : 0) });
+    setActiveId(question.answerHotspotId);
+  }
+
+  function nextQuestion() {
+    setQuiz((q) => (q ? { ...q, index: q.index + 1, picked: null } : q));
+    setActiveId(null);
+  }
+
+  function endQuiz() {
+    setQuiz(null);
+    setActiveId(null);
+  }
+
+  /* ---------------- Selection + keyboard ---------------- */
+
+  function select(id: string) {
+    if (quiz && !quizDone) {
+      if (id) answer(id);
+      return;
+    }
+    if (tour) setTour((t) => (t ? { ...t, playing: false } : t));
+    setApproach(null);
+    setActiveId(id === "" ? null : id);
+  }
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement | null;
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA")) return;
       if (e.key === "Escape") {
-        setActiveId(null);
+        if (tour) endTour();
+        else if (quiz) endQuiz();
+        else setActiveId(null);
         return;
+      }
+      if (tour) {
+        if (e.key === " ") {
+          e.preventDefault();
+          setTour((t) => (t ? { ...t, playing: !t.playing } : t));
+          return;
+        }
+        if (e.key === "ArrowRight") return stepTour(1);
+        if (e.key === "ArrowLeft") return stepTour(-1);
       }
       const n = Number(e.key);
       const target = n >= 1 && n <= 9 ? scene.hotspots[n - 1] : undefined;
-      if (target) setActiveId(target.id);
+      if (target) select(target.id);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [scene]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scene, tour, quiz, question]);
+
+  const toggles = SCENE_TOGGLES[scene.id] ?? [];
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border/70 bg-background/70 px-4 py-3 backdrop-blur-xl md:px-6">
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-4 py-3 md:px-6">
         <div className="flex min-w-0 items-center gap-4">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Library</span>
+            <span className="hidden sm:inline">Atlas</span>
           </Link>
           <div className="h-6 w-px bg-border" />
           <div className="min-w-0">
-            <h1 className="truncate font-display text-base font-semibold md:text-lg">
+            <h1 className="truncate font-display text-xl leading-none md:text-2xl">
               {scene.title}
             </h1>
-            <p className="label-mono truncate">
+            <p className="label-mono mt-1 truncate">
               {scene.subject} · {scene.level}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setAutoRotate((v) => !v)}
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs transition-colors ${
-              autoRotate
-                ? "border-primary/70 bg-primary/15 text-primary"
-                : "border-border text-muted-foreground hover:text-foreground"
-            }`}
-          >
+          {error ? (
+            <span className="hidden text-xs text-destructive md:inline">{error}</span>
+          ) : null}
+          {tour ? (
+            <HeaderButton onClick={endTour} active>
+              <X className="h-3.5 w-3.5" /> End tour
+            </HeaderButton>
+          ) : (
+            <HeaderButton onClick={startTour} disabled={busy !== null}>
+              {busy === "tour" ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RouteIcon className="h-3.5 w-3.5" />
+              )}{" "}
+              Guided tour
+            </HeaderButton>
+          )}
+          {quiz ? (
+            <HeaderButton onClick={endQuiz} active>
+              <X className="h-3.5 w-3.5" /> End quiz
+            </HeaderButton>
+          ) : (
+            <HeaderButton onClick={startQuiz} disabled={busy !== null}>
+              {busy === "quiz" ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <ListChecks className="h-3.5 w-3.5" />
+              )}{" "}
+              Quiz
+            </HeaderButton>
+          )}
+          <div className="mx-1 h-6 w-px bg-border" />
+          <HeaderButton onClick={() => setAutoRotate((v) => !v)} active={autoRotate}>
             <Orbit className="h-3.5 w-3.5" /> Orbit
-          </button>
-          <button
+          </HeaderButton>
+          <HeaderButton
             onClick={() => {
               setKey((k) => k + 1);
               setActiveId(null);
+              setApproach(null);
             }}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
-            <RotateCcw className="h-3.5 w-3.5" /> Reset view
-          </button>
+            <RotateCcw className="h-3.5 w-3.5" /> Reset
+          </HeaderButton>
         </div>
       </header>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 p-3 lg:grid-cols-[260px_1fr_360px] md:p-4">
+      <div className="grid min-h-0 flex-1 grid-cols-1 gap-3 p-3 lg:grid-cols-[250px_1fr_360px] md:p-4">
         {/* Structure index */}
         <aside className="panel order-2 hidden min-h-0 flex-col overflow-hidden lg:order-1 lg:flex">
-          <div className="flex items-center gap-2 border-b border-border/70 px-4 py-3">
+          <div className="flex items-center gap-2 border-b border-border px-4 py-3">
             <Layers className="h-4 w-4 text-primary" />
-            <span className="font-display text-sm font-semibold">Structure index</span>
+            <span className="font-display text-lg">Structures</span>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto p-2">
             {scene.hotspots.map((h, i) => (
               <button
                 key={h.id}
-                onClick={() => setActiveId(h.id)}
-                className={`mb-1 w-full rounded-lg px-3 py-2.5 text-left transition-colors ${
-                  activeId === h.id
-                    ? "bg-primary/15 ring-1 ring-primary/40"
-                    : "hover:bg-secondary/60"
+                onClick={() => select(h.id)}
+                className={`mb-0.5 w-full rounded-md px-3 py-2.5 text-left transition-colors ${
+                  activeId === h.id ? "bg-primary/10 text-primary" : "hover:bg-secondary"
                 }`}
               >
                 <div className="flex items-baseline gap-2">
@@ -122,13 +319,13 @@ export function StudioView({ scene }: { scene: SceneModule }) {
               </button>
             ))}
           </div>
-          {(SCENE_TOGGLES[scene.id] ?? []).length > 0 ? (
-            <div className="border-t border-border/70 px-4 py-3">
+          {toggles.length > 0 ? (
+            <div className="border-t border-border px-4 py-3">
               <div className="mb-2 flex items-center gap-2">
-                <Sliders className="h-3.5 w-3.5 text-accent" />
+                <Sliders className="h-3.5 w-3.5 text-muted-foreground" />
                 <span className="label-mono">Render options</span>
               </div>
-              {(SCENE_TOGGLES[scene.id] ?? []).map((t) => (
+              {toggles.map((t) => (
                 <label
                   key={t.key}
                   className="mb-1.5 flex cursor-pointer items-center gap-2 text-xs text-muted-foreground"
@@ -152,10 +349,11 @@ export function StudioView({ scene }: { scene: SceneModule }) {
             key={key}
             scene={scene}
             activeHotspot={activeId}
-            onSelectHotspot={onSelect}
-            onViewpoint={onViewpoint}
+            approach={approach}
+            onSelectHotspot={select}
+            onViewpoint={setViewpoint}
             options={options}
-            autoRotate={autoRotate}
+            autoRotate={autoRotate && !tour}
           />
           <div className="pointer-events-none absolute left-4 top-4 max-w-xs">
             <p className="label-mono text-ink-foreground/55">{scene.accentLabel} module</p>
@@ -163,37 +361,237 @@ export function StudioView({ scene }: { scene: SceneModule }) {
               {scene.tagline}
             </p>
           </div>
-          {hotspot ? (
+
+          {tour && stop ? (
+            <TourBar
+              index={tour.index}
+              total={tour.plan.stops.length}
+              title={stop.title}
+              playing={tour.playing}
+              onPrev={() => stepTour(-1)}
+              onNext={() => stepTour(1)}
+              onToggle={() => setTour((t) => (t ? { ...t, playing: !t.playing } : t))}
+              onEnd={endTour}
+            />
+          ) : null}
+
+          {quiz ? (
+            <QuizCard
+              quiz={quiz}
+              scene={scene}
+              onNext={nextQuestion}
+              onAgain={startQuiz}
+              onClose={endQuiz}
+            />
+          ) : null}
+
+          {hotspot && !(quiz && !quizDone && !quiz.picked) ? (
             <div className="pointer-events-none absolute bottom-4 left-4 right-4 rounded-md border border-border bg-background/95 p-4 shadow-lg md:max-w-md">
               <p className="eyebrow">{hotspot.category}</p>
               <p className="mt-1 font-display text-2xl leading-none">{hotspot.name}</p>
-              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                 {hotspot.summary}
               </p>
               <ul className="mt-2 flex flex-wrap gap-1.5">
                 {hotspot.facts.map((f) => (
                   <li
                     key={f}
-                    className="rounded-full border border-border/70 px-2 py-0.5 text-[10px] text-muted-foreground"
+                    className="rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground"
                   >
                     {f}
                   </li>
                 ))}
               </ul>
             </div>
-          ) : (
+          ) : !quiz && !tour ? (
             <p className="pointer-events-none absolute bottom-4 left-4 text-xs text-ink-foreground/55">
               Drag to orbit · scroll to zoom · click a marker or press 1–
               {Math.min(9, scene.hotspots.length)} · Esc clears
             </p>
-          )}
+          ) : null}
         </section>
 
         {/* Tutor */}
         <aside className="order-3 min-h-[42vh] lg:min-h-0">
-          <TutorPanel scene={scene} hotspot={hotspot} viewpoint={viewpoint} />
+          <TutorPanel
+            scene={scene}
+            hotspot={hotspot}
+            viewpoint={viewpoint}
+            narration={narration}
+            quiet={tour !== null || quiz !== null}
+          />
         </aside>
       </div>
+    </div>
+  );
+}
+
+function HeaderButton({
+  children,
+  onClick,
+  active = false,
+  disabled = false,
+}: {
+  children: React.ReactNode;
+  onClick: () => void;
+  active?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs transition-colors disabled:opacity-50 ${
+        active
+          ? "border-primary bg-primary/10 text-primary"
+          : "border-border text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function TourBar({
+  index,
+  total,
+  title,
+  playing,
+  onPrev,
+  onNext,
+  onToggle,
+  onEnd,
+}: {
+  index: number;
+  total: number;
+  title: string;
+  playing: boolean;
+  onPrev: () => void;
+  onNext: () => void;
+  onToggle: () => void;
+  onEnd: () => void;
+}) {
+  const btn =
+    "inline-flex h-7 w-7 items-center justify-center rounded text-foreground/80 hover:bg-secondary hover:text-foreground disabled:opacity-30";
+  return (
+    <div className="absolute right-4 top-4 flex items-center gap-1 rounded-md border border-border bg-background/95 p-1.5 shadow-lg">
+      <button className={btn} onClick={onPrev} disabled={index === 0} aria-label="Previous stop">
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <button className={btn} onClick={onToggle} aria-label={playing ? "Pause" : "Play"}>
+        {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+      </button>
+      <button className={btn} onClick={onNext} disabled={index >= total - 1} aria-label="Next stop">
+        <ChevronRight className="h-4 w-4" />
+      </button>
+      <div className="mx-2 min-w-0">
+        <p className="label-mono">
+          Stop {index + 1} / {total}
+        </p>
+        <p className="max-w-[180px] truncate text-sm">{title}</p>
+      </div>
+      <div className="mx-1 flex gap-0.5">
+        {Array.from({ length: total }, (_, i) => (
+          <span
+            key={i}
+            className={`h-1 w-3 rounded-full ${i <= index ? "bg-primary" : "bg-border"}`}
+          />
+        ))}
+      </div>
+      <button className={btn} onClick={onEnd} aria-label="End tour">
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
+function QuizCard({
+  quiz,
+  scene,
+  onNext,
+  onAgain,
+  onClose,
+}: {
+  quiz: Quiz;
+  scene: SceneModule;
+  onNext: () => void;
+  onAgain: () => void;
+  onClose: () => void;
+}) {
+  const total = quiz.set.questions.length;
+  const q = quiz.set.questions[quiz.index];
+
+  if (!q) {
+    return (
+      <div className="absolute right-4 top-4 w-80 rounded-md border border-border bg-background/95 p-5 shadow-lg">
+        <p className="eyebrow">Quiz complete</p>
+        <p className="mt-2 font-display text-4xl">
+          {quiz.correct} <span className="text-muted-foreground">/ {total}</span>
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {quiz.correct === total
+            ? "Every structure placed correctly."
+            : quiz.correct >= total / 2
+              ? "Solid. Walk the model again and retry the ones you missed."
+              : "Take the guided tour, then try again."}
+        </p>
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={onAgain}
+            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
+          >
+            New quiz
+          </button>
+          <button
+            onClick={onClose}
+            className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const answered = quiz.picked !== null;
+  const correct = quiz.picked === q.answerHotspotId;
+  const answerName = scene.hotspots.find((h) => h.id === q.answerHotspotId)?.name ?? "";
+  const pickedName = scene.hotspots.find((h) => h.id === quiz.picked)?.name ?? "";
+
+  return (
+    <div className="absolute right-4 top-4 w-80 rounded-md border border-border bg-background/95 p-5 shadow-lg">
+      <div className="flex items-center justify-between">
+        <p className="eyebrow">
+          Question {quiz.index + 1} of {total}
+        </p>
+        {quiz.set.offline ? (
+          <span className="rounded-full border border-accent/40 px-1.5 py-px font-mono text-[9px] uppercase tracking-widest text-accent">
+            reference
+          </span>
+        ) : null}
+      </div>
+      <p className="mt-2 font-display text-xl leading-snug">{q.prompt}</p>
+      {!answered ? (
+        <p className="mt-3 text-xs text-muted-foreground">
+          Click the structure in the model, or press its number.
+        </p>
+      ) : (
+        <div className="mt-3">
+          <p className={`text-sm font-medium ${correct ? "text-accent" : "text-primary"}`}>
+            {correct ? "Correct." : `Not quite. You picked ${pickedName}.`}
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            <span className="text-foreground">{answerName}.</span> {q.explanation}
+          </p>
+          <button
+            onClick={onNext}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:opacity-90"
+          >
+            {quiz.index + 1 < total ? "Next question" : "See score"}{" "}
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

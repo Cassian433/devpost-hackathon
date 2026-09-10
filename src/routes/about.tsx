@@ -49,7 +49,6 @@ const layers = [
 const team = [
   { name: "Ayush Kumar", role: "3D scenes and interaction" },
   { name: "Harsh Pratap", role: "AI context pipeline and application architecture" },
-  { name: "Sarthak", role: "Platform, tutor features, release" },
 ];
 
 function About() {
@@ -90,7 +89,7 @@ function About() {
 
         <section className="hairline mt-16 pt-10">
           <p className="eyebrow">Team</p>
-          <ul className="mt-4 grid gap-6 sm:grid-cols-3">
+          <ul className="mt-4 grid gap-6 sm:grid-cols-2">
             {team.map((m) => (
               <li key={m.name}>
                 <p className="font-display text-xl">{m.name}</p>
