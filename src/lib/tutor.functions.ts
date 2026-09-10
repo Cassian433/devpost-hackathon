@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { streamText } from "ai";
 import { z } from "zod";
 
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { getModel } from "./ai.server";
 import { getScene } from "./scenes";
 
 const TutorInput = z.object({
@@ -49,9 +49,6 @@ function describeViewpoint(v: NonNullable<z.infer<typeof TutorInput>["viewpoint"
 export const askTutor = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => TutorInput.parse(input))
   .handler(async ({ data }): Promise<TutorReply> => {
-    const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("AI tutor is not configured (missing LOVABLE_API_KEY).");
-
     const scene = getScene(data.sceneId);
     if (!scene) throw new Error(`Unknown module: ${data.sceneId}`);
 
@@ -76,11 +73,9 @@ export const askTutor = createServerFn({ method: "POST" })
         ? `Explain ${hotspot.name} in the context of the whole model, given where I am standing.`
         : `Orient me: what am I looking at from this viewpoint, and where should I look next?`;
 
-    const gateway = createLovableAiGatewayProvider(apiKey);
-
     try {
       const result = streamText({
-        model: gateway("google/gemini-3.7-flash"),
+        model: getModel(),
         system,
         messages: [
           ...(data.history ?? []).map((m) => ({ role: m.role, content: m.content }) as const),
@@ -101,9 +96,8 @@ export const askTutor = createServerFn({ method: "POST" })
           ? Number((error as { statusCode?: unknown }).statusCode)
           : undefined;
       if (status === 429) throw new Error("The tutor is rate limited right now — try again in a few seconds.");
-      if (status === 402)
-        throw new Error("AI credits for this workspace are exhausted. Add credits in Lovable to resume the tutor.");
-      if (status === 403) throw new Error("AI access is blocked by workspace policy.");
+      if (status === 401 || status === 403)
+        throw new Error("The AI API key was rejected. Check ANTHROPIC_API_KEY / GOOGLE_GENERATIVE_AI_API_KEY in .env.");
       throw new Error(error instanceof Error ? error.message : "The tutor could not answer that.");
     }
   });
